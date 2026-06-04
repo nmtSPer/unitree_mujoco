@@ -8,7 +8,7 @@
 - `simulate_python`: Simulator implemented based on unitree_sdk2_python and mujoco (Python)
 - `unitree_robots`: MJCF description files for robots supported by unitree_sdk2
 - `terrain_tool`: Tool for generating terrain in simulation scenarios
-- `example`: Example programs
+- `agent`: Agent programs
 
 ## Supported Unitree sdk2 Messages:
 **Current version only supports low-level development, mainly used for sim to real verification of controller**
@@ -238,7 +238,7 @@ We provide a tool to parametrically create simple terrains in the mujoco simulat
 ![Terrain Generation Example](./doc/terrain.png)
 
 ## 3. Sim to Real
-The `example` folder contains simple examples of using different interfaces to make the Go2 robot stand up and then lie down. These examples demonstrate how to implement the transition from simulation to reality using interfaces provided by Unitree. Here is an explanation of each folder name:
+The `agent` folder contains simple agent programs using different interfaces to make the Go2 robot stand up and then lie down. These agents demonstrate how to implement the transition from simulation to reality using interfaces provided by Unitree. Here is an explanation of each folder name:
 - `cpp`: Based on C++, using `unitree_sdk2` interface
 - `python`: Based on Python, using  `unitree_sdk2_python` interface
 - `ros2`: Based on ROS2, using `unitree_ros2` interface
@@ -246,7 +246,7 @@ The `example` folder contains simple examples of using different interfaces to m
 ### unitree_sdk2
 1. Compile
 ```bash
-cd example/cpp
+cd agent/cpp
 mkdir build && cd build
 cmake ..
 make -j4
@@ -272,6 +272,7 @@ else
 ### unitree_sdk2_python
 1. Run
 ```bash
+cd agent/python
 python3 ./stand_go2.py # Control the robot in the simulation (make sure the Go2 simulation scene has been loaded)
 python3 ./stand_go2.py enp3s0 # Control the physical robot, where enp3s0 is the name of the network card connected to the robot
 ```
@@ -291,7 +292,7 @@ First, ensure that the unitree_ros2 environment has been properly configured, se
 
 ```bash
 source ~/unitree_ros2/setup.sh
-cd example/ros2
+cd agent/ros2
 colcon build
 ```
 

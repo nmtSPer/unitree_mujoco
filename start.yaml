@@ -1,0 +1,14 @@
+session_name: unitree_mujoco
+start_directory: /media/vmo/2TB/source/1Tuan/Dev/unitree_mujoco
+windows:
+  - window_name: run
+    layout: even-horizontal
+    panes:
+      - shell_command:
+          - ./simulate/build.sh
+          - cd simulate/build
+          - ./unitree_mujoco -r "${UNITREE_ROBOT:-go2}" -s "${UNITREE_SCENE:-scene_terrain.xml}"
+      - shell_command:
+          - ./agent/cpp/build.sh
+          - cd agent/cpp/build
+          - ./"${UNITREE_CONTROLLER}"

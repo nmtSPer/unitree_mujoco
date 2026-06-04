@@ -4,3 +4,13 @@
 **/log/
 **/install/
 simulate/mujoco
+!third_party/unitree_sdk2/include/unitree/common/log/
+!third_party/unitree_sdk2/include/unitree/common/log/**
+
+.codex
+.agents
+/build
+
+# Local nested clone kept only as a source for vendoring. The clean copy lives
+# under third_party/unitree_sdk2.
+/unitree_sdk2/

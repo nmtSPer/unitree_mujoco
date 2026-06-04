@@ -1,0 +1,10 @@
+# Default agent runtime configuration.
+# Local MuJoCo simulation should usually use domain 1 on loopback.
+# Real robots commonly use domain 0 on a physical network interface.
+dds:
+  domain_id: 1
+  interface: "lo"
+
+topics:
+  lowcmd: "rt/lowcmd"
+  lowstate: "rt/lowstate"
