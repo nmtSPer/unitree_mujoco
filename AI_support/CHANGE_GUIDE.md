@@ -10,7 +10,7 @@
   dependency change.
 - Do not commit the local `/unitree_sdk2` clone. It is ignored; the clean vendor
   copy lives at `third_party/unitree_sdk2`.
-- Do not commit build artifacts from `simulate/build` or `agent/*/build`.
+- Do not commit build artifacts from `simulate/build` or `agent/cpp/*/build`.
 
 ## When Changing The DDS/MuJoCo Bridge
 
@@ -52,8 +52,8 @@ cd simulate/build
 
 ## When Adding A New C++ Agent
 
-1. Add the source file under `agent/cpp`.
-2. Update `agent/cpp/CMakeLists.txt` to build the new executable.
+1. Add the source file under `agent/cpp/go2`.
+2. Update `agent/cpp/go2/CMakeLists.txt` to build the new executable.
 3. Prefer reading DDS/topic settings from `agent/config.yaml` instead of
    hardcoding domain, interface, or topic names.
 4. Initialize DDS with domain `1` and interface `lo` for local simulation.
@@ -63,19 +63,17 @@ cd simulate/build
 7. Test with:
 
 ```bash
-./start.sh controller=<agent_executable> robot=<robot> scene=<scene.xml>
+./start.sh robot=<robot> scene=<scene.xml>
 ```
 
-## When Changing start.sh/start.yaml
+## When Changing The Start Workflow
 
 Keep this contract intact:
 
-- `start.sh` accepts exactly three parameters:
-  `controller=... robot=... scene=...`.
-- `controller` is an executable name, not a path.
-- `start.yaml` uses `UNITREE_CONTROLLER`, `UNITREE_ROBOT`, and `UNITREE_SCENE`.
+- `start.sh` accepts exactly two parameters: `robot=... scene=...`.
+- `start.yaml` uses `UNITREE_ROBOT` and `UNITREE_SCENE`.
 - The simulator pane builds/runs the simulator; the agent pane builds/runs the
-  selected executable.
+  selected robot's `main` executable.
 
 After editing, run:
 
@@ -121,7 +119,7 @@ Watch for:
 Read:
 
 - `agent/config.yaml`
-- `agent/cpp/stand_go2.cpp`
+- `agent/cpp/go2/main.cpp`
 - `agent/python/stand_go2.py`
 
 Keep C++ and Python agent CLI behavior aligned:
@@ -133,7 +131,7 @@ Keep C++ and Python agent CLI behavior aligned:
 
 ## Suggested Validation By Change Type
 
-- C++ build/system: `./simulate/build.sh`, `./agent/cpp/build.sh`.
+- C++ build/system: `./simulate/build.sh`, `./agent/cpp/go2/build.sh`.
 - CLI/start: `./start.sh --help`, then a Go2 smoke test.
 - Bridge/topic: run simulator and sample agent; verify the agent receives
   `LowState` and the robot reacts to `LowCmd`.

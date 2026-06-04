@@ -13,4 +13,8 @@ fi
 cmake -S "$SCRIPT_DIR" -B "$BUILD_DIR"
 cmake --build "$BUILD_DIR" -j "$JOBS"
 
-echo "Built C++ agent: $BUILD_DIR/stand_go2"
+if [ -x "$BUILD_DIR/main" ]; then
+  echo "Built C++ agent: $BUILD_DIR/main"
+else
+  echo "No main.cpp controller found for: $SCRIPT_DIR"
+fi

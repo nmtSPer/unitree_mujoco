@@ -7,8 +7,8 @@ windows:
       - shell_command:
           - ./simulate/build.sh
           - cd simulate/build
-          - ./unitree_mujoco -r "${UNITREE_ROBOT:-go2}" -s "${UNITREE_SCENE:-scene_terrain.xml}"
+          - ./unitree_mujoco -r "${UNITREE_ROBOT}" -s "${UNITREE_SCENE}"
       - shell_command:
-          - ./agent/cpp/build.sh
-          - cd agent/cpp/build
-          - ./"${UNITREE_CONTROLLER}"
+          - ./agent/cpp/"${UNITREE_ROBOT}"/build.sh
+          - cd agent/cpp/"${UNITREE_ROBOT}"/build
+          - ./main

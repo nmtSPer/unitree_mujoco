@@ -81,7 +81,7 @@ against MJCF and the C++ bridge to avoid index drift.
 
 ## Sample Agents
 
-- `agent/cpp/stand_go2.cpp`
+- `agent/cpp/go2/main.cpp`
   - Loads DDS/topic defaults from `agent/config.yaml`.
   - Initializes DDS with `ChannelFactory::Instance()->Init(domain_id,
     interface)`.
@@ -128,7 +128,7 @@ Special body names:
 - MuJoCo is linked through the `simulate/mujoco` symlink, usually pointing to
   `~/.mujoco/mujoco-<version>`.
 - Unitree SDK2 C++ is vendored at `third_party/unitree_sdk2`. `simulate` and
-  `agent/cpp` use this copy first, then fall back to
+  `agent/cpp/go2` use this copy first, then fall back to
   `/opt/unitree_robotics/lib/cmake` if the vendor directory is absent.
 - The C++ simulator needs `yaml-cpp`, `spdlog`, `boost_program_options`, `glfw`,
   `fmt`, `pthread`, `mujoco`, and `unitree_sdk2`.

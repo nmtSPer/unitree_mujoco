@@ -24,7 +24,7 @@ simulator implementations:
 - `simulate_python`: Python simulator for quick tests or prototypes.
 - `unitree_robots`: MJCF files, meshes, scenes, and terrain assets for Unitree
   robots.
-- `agent`: sample controllers/agents in C++, Python, and ROS2.
+- `agent`: controllers in C++, Python, and ROS2.
 - `terrain_tool`: terrain generation utilities using primitives and heightmaps.
 - `third_party/unitree_sdk2`: clean vendored Unitree SDK2 copy used by both the
   simulator and C++ agents.
@@ -34,19 +34,18 @@ Current robot folders under `unitree_robots`: `a2`, `b2`, `b2w`, `g1`, `go2`,
 
 ## Important Entry Points
 
-- `start.sh`: convenience entrypoint accepting
-  `controller=... robot=... scene=...`, exporting environment variables, then
-  calling `tmuxp load start.yaml`.
+- `start.sh`: command entrypoint accepting `robot=... scene=...`, exporting
+  environment variables, then calling tmuxp.
 - `start.yaml`: runs the C++ simulator and C++ agent side by side in tmux.
-- `third_party/unitree_sdk2`: vendored SDK used by `simulate` and `agent/cpp`
+- `third_party/unitree_sdk2`: vendored SDK used by `simulate` and `agent/cpp/go2`
   CMake before falling back to a system install.
 - `simulate/build.sh`: builds the C++ simulator into `simulate/build`.
 - `simulate/src/main.cc`: MuJoCo main loop, config loading, bridge thread setup.
 - `simulate/src/param.h`: reads `simulate/config.yaml` and parses CLI options.
 - `simulate/src/unitree_sdk2_bridge.h`: bridge between MuJoCo data and DDS
   topics.
-- `agent/config.yaml`: shared DDS/topic defaults for sample agents.
-- `agent/cpp/stand_go2.cpp`: sample Go2 controller publishing `rt/lowcmd`.
+- `agent/config.yaml`: shared DDS/topic defaults for controllers.
+- `agent/cpp/go2/main.cpp`: sample Go2 controller publishing `rt/lowcmd`.
 
 ## Useful Defaults For AI Agents
 
@@ -68,7 +67,7 @@ Current robot folders under `unitree_robots`: `a2`, `b2`, `b2w`, `g1`, `go2`,
   the task clearly requires an SDK update.
 - `/unitree_sdk2/` may exist locally as a nested SDK clone, but it is ignored by
   this repo to avoid embedded Git repository warnings.
-- `simulate/build/`, `agent/cpp/build/`, and generated binaries are build
+- `simulate/build/`, `agent/cpp/go2/build/`, and generated binaries are build
   outputs, not source.
 - The working tree may already contain user changes. Always check
   `git status --short` before editing, and never revert changes you did not

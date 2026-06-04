@@ -21,36 +21,30 @@ back to a system install under `/opt/unitree_robotics`.
 ## Build The Sample C++ Agent
 
 ```bash
-cd agent/cpp
+cd agent/cpp/go2
 ./build.sh
 ```
 
 Main output:
 
-- `agent/cpp/build/stand_go2`
+- `agent/cpp/go2/build/main`
 
 The C++ agent CMake prefers `third_party/unitree_sdk2` when present, then falls
 back to a system install under `/opt/unitree_robotics`.
 
-## Run With start.sh
+## Run With start.sh And tmuxp
 
-`start.sh` uses `tmuxp` to run the simulator and controller in two panes.
+`start.sh` is the preferred entrypoint for the tmuxp workflow. Run it with
+exactly two runtime values:
 
 ```bash
-./start.sh controller=stand_go2 robot=go2 scene=scene_terrain.xml
+./start.sh robot=go2 scene=scene_terrain.xml
 ```
 
-Always provide all three parameters:
+These values become environment variables consumed by `start.yaml`:
 
-- `controller`: executable name under `agent/cpp/build`, not a path.
-- `robot`: folder name under `unitree_robots`.
-- `scene`: scene file under `unitree_robots/<robot>`.
-
-Exported environment variables:
-
-- `UNITREE_CONTROLLER`
-- `UNITREE_ROBOT`
-- `UNITREE_SCENE`
+- `UNITREE_ROBOT`: folder name under `unitree_robots`.
+- `UNITREE_SCENE`: scene file under `unitree_robots/<robot>`.
 
 ## Run Manually
 
@@ -66,13 +60,13 @@ cd build
 Terminal 2:
 
 ```bash
-cd agent/cpp
+cd agent/cpp/go2
 ./build.sh
 cd build
-./stand_go2
+./main
 ```
 
-The C++ and Python sample agents read DDS/topic defaults from
+The C++ and Python controllers read DDS/topic defaults from
 `agent/config.yaml`, which defaults to DDS domain `1`, interface `lo`,
 `rt/lowcmd`, and `rt/lowstate`. This matches `simulate/config.yaml` for local
 simulation.
@@ -80,9 +74,9 @@ simulation.
 CLI override examples:
 
 ```bash
-./stand_go2 --domain 1 --interface lo
-./stand_go2 --config ../../config.yaml
-./stand_go2 eth0
+./main --domain 1 --interface lo
+./main --config ../../../config.yaml
+./main eth0
 ```
 
 The final form is kept for legacy real-robot runs: it uses domain `0` and the
@@ -184,10 +178,10 @@ Recommended minimum:
 
 ```bash
 ./simulate/build.sh
-./agent/cpp/build.sh
+./agent/cpp/go2/build.sh
 ```
 
-If changing the start workflow:
+If changing the start workflow, verify script parsing:
 
 ```bash
 ./start.sh --help

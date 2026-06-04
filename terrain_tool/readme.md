@@ -1,10 +1,20 @@
 # Terrain Generation Tool
+
+This tool generates simple MuJoCo terrain scenes such as boxes, stairs, rough
+ground, and height fields. It is usually used to create or update
+`unitree_robots/<robot>/scene_terrain.xml`.
+
 ## Usage
-1. First, install dependencies:
+
+1. Install dependencies:
+
 ```bash
 pip3 install noise opencv-python numpy 
 ```
-2. Open `terrain_generator.py` and modify the initial configuration at the beginning. Here, we will use the Go2 robot as an example:
+
+2. Open `terrain_generator.py` and modify the initial configuration near the
+   top. Example for Go2:
+
 ```python
 # Robot directory
 ROBOT = "go2"
@@ -13,30 +23,48 @@ INPUT_SCENE_PATH = "./scene.xml"
 # Output
 OUTPUT_SCENE_PATH = "../unitree_robots/" + ROBOT + "/scene_terrain.xml"
 ```
-3. Run:
+
+3. Run the generator:
+
 ```bash
 cd terrain_tool
 python3 ./terrain_generator.py
 ```
-The program will output the terrain scene file to `/unitree_robots/go2/scene_terrain.xml`. Then, you can modify the simulator configuration file `simulate/config.yaml` and set the scene to the newly generated `scene_terrain.xml`:
+
+The program writes the terrain scene to
+`unitree_robots/go2/scene_terrain.xml`.
+
+To run it with the current start/tmuxp workflow:
+
+```bash
+./start.sh robot=go2 scene=scene_terrain.xml
+```
+
+Or set the simulator default in `simulate/config.yaml`:
+
 ```yaml
 robot_scene: "scene_terrain.xml"
 ```
-If you are using a Python-based simulator, modify `simulate_python/config.py`:
+
+If using the Python simulator, modify `simulate_python/config.py`:
+
 ```python
 ROBOT_SCENE = "../unitree_robots/" + ROBOT + "/scene_terrain.xml" 
 ```
-After that, run the unitree_mujoco simulator, and you can see the generated terrain.
-# Function Explanation
-Users can utilize `terrain_generator.py` to add the desired terrain. Below is an explanation of the functions.
-##### 1. `AddBox`
+
+## Function Reference
+
+`terrain_generator.py` provides these helper functions.
+### `AddBox`
+
 Add a cube, parameters:
 ```python
 position=[1.0, 0.0, 0.0] # Center position
 euler=[0.0, 0.0, 0.0] # Orientation
 size=[0.1, 0.1, 0.1] # Size, length x width x height
 ``` 
-##### 2. `AddGeometry`
+### `AddGeometry`
+
 Add a geometry, parameters:
 ```python
 position=[1.0, 0.0, 0.0] # Center position
@@ -44,7 +72,8 @@ euler=[0.0, 0.0, 0.0] # Orientation
 size=[0.1, 0.1, 0.1] # Size, some geometries only require the first two parameters
 geo_type="cylinder" # Geometry type, supports "plane", "sphere", "capsule", "ellipsoid", "cylinder", "box"
 ``` 
-##### 3. `AddStairs`
+### `AddStairs`
+
 Add stairs, parameters:
 ```python
 init_pos=[1.0, 0.0, 0.0] # Position of the stair near the ground
@@ -54,7 +83,8 @@ height=0.15 # Stair height
 length=1.5 # Stair length
 stair_nums=10 # Number of stairs
 ```
-##### 4. `AddSuspendStairs`
+### `AddSuspendStairs`
+
 Add floating stairs, parameters:
 ```python
 init_pos=[1.0, 0.0, 0.0] # Position of the stair near the ground
@@ -65,7 +95,8 @@ length=1.5 # Stair length
 gap=0.1 # Floating gap
 stair_nums=10 # Number of stairs
 ```
-##### 5. `AddRoughGround`
+### `AddRoughGround`
+
 Add rough terrain by randomly arranging cubes, parameters:
 ```python
 init_pos=[1.0, 0.0, 0.0] # Position of the first cube
@@ -79,7 +110,8 @@ box_euler_rand=[0.2, 0.2, 0.2], # Random increment of cube orientation
 separation_rand=[0.05, 0.05] # Random increment of cube separation
 ```
 
-##### 6.`AddPerlinHeighField`
+### `AddPerlinHeighField`
+
 Generate terrain based on Perlin noise, parameters:
 ```python
 position=[1.0, 0.0, 0.0],  # Terrain center position
@@ -96,7 +128,8 @@ perlin_lacunarity=2.0,
 output_heightmap_image="height_field.png"  # Output height map image name
 ```
 
-##### 7. `AddHeighFieldFromImage`
+### `AddHeighFieldFromImage`
+
 Generate terrain based on a given image, parameters:
 ```python
 position=[1.0, 0.0, 0.0] # Terrain center position

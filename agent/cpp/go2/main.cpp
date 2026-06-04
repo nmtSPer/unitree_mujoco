@@ -30,7 +30,7 @@ std::filesystem::path DefaultConfigPath(const char *argv0)
 {
     std::filesystem::path exe_path(argv0);
     auto exe_dir = exe_path.has_parent_path() ? exe_path.parent_path() : std::filesystem::path(".");
-    return exe_dir / ".." / ".." / "config.yaml";
+    return exe_dir / ".." / ".." / ".." / "config.yaml";
 }
 
 AgentConfig LoadAgentConfig(const std::filesystem::path &config_path)
@@ -91,8 +91,8 @@ AgentConfig ParseArgs(int argc, const char **argv)
         else if (arg == "--help" || arg == "-h")
         {
             std::cout << "Usage:\n"
-                      << "  ./stand_go2 [--config PATH] [--domain ID] [--interface IFACE]\n"
-                      << "  ./stand_go2 IFACE  # legacy: domain 0, given interface\n";
+                      << "  ./main [--config PATH] [--domain ID] [--interface IFACE]\n"
+                      << "  ./main IFACE  # legacy: domain 0, given interface\n";
             exit(EXIT_SUCCESS);
         }
         else if (arg == "--domain" && i + 1 < argc)
