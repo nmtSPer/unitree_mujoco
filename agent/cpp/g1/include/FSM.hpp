@@ -44,9 +44,9 @@ class RlState final : public FsmState {
   JointDomainRlController controller_;
 };
 
-class Fsm {
+class FSM {
  public:
-  Fsm(const RuntimeConfig& config, const PolicyFactory& policy_factory);
+  FSM(const RuntimeConfig& config, const PolicyFactory& policy_factory);
   void enter(ControllerContext& ctx, MotorCommand& out);
   void step(const InputCommand& input, ControllerContext& ctx, MotorCommand& out);
   void exit(ControllerContext& ctx, MotorCommand& out);

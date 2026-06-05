@@ -1,4 +1,4 @@
-#include "fsm.hpp"
+#include "FSM.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -47,7 +47,7 @@ void RlState::exit(ControllerContext& ctx, MotorCommand& out) {
   controller_.exit(ctx, out);
 }
 
-Fsm::Fsm(const RuntimeConfig& config, const PolicyFactory& policy_factory)
+FSM::FSM(const RuntimeConfig& config, const PolicyFactory& policy_factory)
     : initial_state_(config.fsm.initial_state) {
   for (const auto& state : config.states) {
     if (state.type == "passive") {
@@ -64,13 +64,13 @@ Fsm::Fsm(const RuntimeConfig& config, const PolicyFactory& policy_factory)
   requireState(initial_state_);
 }
 
-void Fsm::enter(ControllerContext& ctx, MotorCommand& out) {
+void FSM::enter(ControllerContext& ctx, MotorCommand& out) {
   current_ = &requireState(initial_state_);
   std::cout << "[g1] FSM enter: " << current_->name() << "\n";
   current_->enter(ctx, out);
 }
 
-void Fsm::step(const InputCommand& input, ControllerContext& ctx, MotorCommand& out) {
+void FSM::step(const InputCommand& input, ControllerContext& ctx, MotorCommand& out) {
   if (!current_) {
     enter(ctx, out);
   }
@@ -82,7 +82,7 @@ void Fsm::step(const InputCommand& input, ControllerContext& ctx, MotorCommand& 
   current_->step(ctx, out);
 }
 
-void Fsm::exit(ControllerContext& ctx, MotorCommand& out) {
+void FSM::exit(ControllerContext& ctx, MotorCommand& out) {
   if (current_) {
     current_->exit(ctx, out);
   } else {
@@ -91,12 +91,12 @@ void Fsm::exit(ControllerContext& ctx, MotorCommand& out) {
   current_ = nullptr;
 }
 
-const std::string& Fsm::currentStateName() const {
+const std::string& FSM::currentStateName() const {
   static const std::string none = "none";
   return current_ ? current_->name() : none;
 }
 
-FsmState& Fsm::requireState(const std::string& name) {
+FsmState& FSM::requireState(const std::string& name) {
   const auto it = states_.find(name);
   if (it == states_.end()) {
     throw std::runtime_error("unknown FSM state: " + name);
@@ -104,7 +104,7 @@ FsmState& Fsm::requireState(const std::string& name) {
   return *it->second;
 }
 
-void Fsm::transitionTo(const std::string& target, ControllerContext& ctx, MotorCommand& out) {
+void FSM::transitionTo(const std::string& target, ControllerContext& ctx, MotorCommand& out) {
   auto& next = requireState(target);
   std::cout << "[g1] FSM transition: " << current_->name() << " -> " << next.name() << "\n";
   current_->exit(ctx, out);

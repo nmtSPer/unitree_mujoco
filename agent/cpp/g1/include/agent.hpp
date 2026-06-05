@@ -8,7 +8,7 @@
 #include <unitree/robot/channel/channel_publisher.hpp>
 #include <unitree/robot/channel/channel_subscriber.hpp>
 
-#include "fsm.hpp"
+#include "FSM.hpp"
 #include "keyboard.hpp"
 #include "policy.hpp"
 #include "types.hpp"
@@ -31,7 +31,7 @@ class G1RlAgent {
 
   RuntimeConfig config_;
   PolicyFactory policy_factory_;
-  Fsm fsm_;
+  FSM fsm_;
   KeyboardInput keyboard_;
   ControllerContext context_;
   DataBuffer<RobotState> state_buffer_;
