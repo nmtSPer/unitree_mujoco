@@ -12,11 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// !!! hack code: make glfw_adapter.window_ public
-#define private public
-#include "glfw_adapter.h"
-#undef private
-
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -29,9 +24,11 @@
 #include <string>
 #include <thread>
 
+#include <GLFW/glfw3.h>
 #include <mujoco/mujoco.h>
 #include "simulate.h"
 #include "array_safety.h"
+#include "custom_ui.h"
 #include "unitree_sdk2_bridge.h"
 #include "param.h"
 
@@ -619,7 +616,7 @@ __attribute__((used, visibility("default"))) extern "C" void _mj_rosettaError(co
 #endif
 
 // user keyboard callback
-void user_key_cb(GLFWwindow* window, int key, int scancode, int act, int mods) {
+void user_key_cb(int key, int scancode, int act) {
   if (act==GLFW_PRESS)
   {
     if(param::config.enable_elastic_band == 1) {
@@ -630,10 +627,6 @@ void user_key_cb(GLFWwindow* window, int key, int scancode, int act, int mods) {
       } else if (key==GLFW_KEY_8 || key==GLFW_KEY_DOWN) {
         elastic_band.length_ += 0.1;
       }
-    }
-    if(key==GLFW_KEY_BACKSPACE) {
-      mj_resetData(m, d);
-      mj_forward(m, d);
     }
   }
 }
@@ -679,16 +672,19 @@ int main(int argc, char **argv)
   }
 
   // simulate object encapsulates the UI
+  auto platform_ui = mj::MakeCustomUiAdapter();
+  auto *platform_ui_raw = platform_ui.get();
   auto sim = std::make_unique<mj::Simulate>(
-    std::make_unique<mj::GlfwAdapter>(),
+    std::move(platform_ui),
     &cam, &opt, &pert, /* is_passive = */ false);
+  mj::AttachCustomUi(sim.get(), platform_ui_raw);
+  mj::SetCustomKeyCallback(platform_ui_raw, user_key_cb);
 
   std::thread unitree_thread(UnitreeSdk2BridgeThread, nullptr);
 
   // start physics thread
   std::thread physicsthreadhandle(&PhysicsThread, sim.get(), param::config.robot_scene.c_str());
   // start simulation UI loop (blocking call)
-  glfwSetKeyCallback(static_cast<mj::GlfwAdapter*>(sim->platform_ui.get())->window_,user_key_cb);
   sim->RenderLoop();
   physicsthreadhandle.join();
 

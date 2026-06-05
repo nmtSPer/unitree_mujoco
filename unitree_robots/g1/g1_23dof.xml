@@ -479,4 +479,8 @@
     <accelerometer name="secondary_imu_acc" site="secondary_imu" noise="1e-2" cutoff="157"/>
   </sensor>
 
+  <equality>
+    <weld name="unit_test" body1="world" body2="torso_link" />
+  </equality>
+
 </mujoco>

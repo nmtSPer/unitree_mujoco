@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(unitree_mujoco)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   message("Debug mode")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -O0 -fPIC")
@@ -24,6 +26,7 @@ include_directories(
   /usr/local/include/iceoryx/v2.0.2
   mujoco/include
   mujoco/simulate
+  src/custom_ui/common
   src/lodepng
 )
 link_directories(mujoco/lib)
@@ -35,6 +38,7 @@ file(GLOB SIM_SRC
   mujoco/simulate/glfw_*.cc
   mujoco/simulate/platform_*.cc
   mujoco/simulate/simulate.cc
+  src/custom_ui/common/custom_ui.cc
   src/lodepng/lodepng.cpp
 )
 
