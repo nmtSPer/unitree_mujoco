@@ -262,7 +262,8 @@ public:
     G1Bridge(mjModel *model, mjData *data) : RobotBridge(model, data)
     {
         if (param::config.robot.find("g1") != std::string::npos) {
-            auto* g1_lowstate = dynamic_cast<unitree::robot::g1::publisher::LowState*>(lowstate.get());
+            auto* g1_lowstate =
+                dynamic_cast<unitree::robot::g1::publisher::LowState*>(this->lowstate.get());
             if (g1_lowstate) {
                 auto scene = param::config.robot_scene.filename().string();
                 g1_lowstate->msg_.mode_machine() = scene.find("23") != std::string::npos ? 4 : 5;

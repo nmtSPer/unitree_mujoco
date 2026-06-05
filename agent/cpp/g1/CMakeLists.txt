@@ -3,6 +3,8 @@ get_filename_component(ROBOT_NAME "${CMAKE_CURRENT_LIST_DIR}" NAME)
 project(${ROBOT_NAME}_controllers)
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(ROBOT_MAIN "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
 if(NOT EXISTS "${ROBOT_MAIN}")
@@ -20,5 +22,15 @@ else()
 endif()
 find_package(yaml-cpp REQUIRED)
 
-add_executable(main "${ROBOT_MAIN}")
+set(G1_SOURCES
+  "${ROBOT_MAIN}"
+  "${CMAKE_CURRENT_LIST_DIR}/src/agent.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/config.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/fsm.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/keyboard.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/policy.cpp"
+)
+
+add_executable(main ${G1_SOURCES})
+target_include_directories(main PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include")
 target_link_libraries(main unitree_sdk2 yaml-cpp)
