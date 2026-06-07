@@ -1,0 +1,11 @@
+fsm:
+  initial_state: "passive"
+  transitions:
+    - key: "1"
+      to: "passive"
+    - key: "2"
+      to: "pd"
+    - key: "3"
+      to: "stand"
+    - key: "4"
+      to: "walk"

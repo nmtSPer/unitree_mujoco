@@ -8,7 +8,7 @@
 #include <unitree/robot/channel/channel_publisher.hpp>
 #include <unitree/robot/channel/channel_subscriber.hpp>
 
-#include "FSM.hpp"
+#include "fsm/fsm.hpp"
 #include "keyboard.hpp"
 #include "policy.hpp"
 #include "types.hpp"

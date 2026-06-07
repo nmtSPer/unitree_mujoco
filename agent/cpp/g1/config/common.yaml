@@ -1,0 +1,43 @@
+dds:
+  domain_id: 1
+  interface: "lo"
+
+topics:
+  lowcmd: "rt/lowcmd"
+  lowstate: "rt/lowstate"
+
+runtime:
+  release_motion_service: false
+  wait_for_enter: true
+
+keyboard:
+  vx_step: 0.05
+  vy_step: 0.05
+  wz_step: 0.05
+
+controller:
+  dt: 0.002
+  ankle_mode: "PR"
+  action_clip: 1.0
+  default_velocity:
+    vx: 0.0
+    vy: 0.0
+    wz: 0.0
+  velocity_limits:
+    vx: 0.8
+    vy: 0.4
+    wz: 1.0
+  default_q: [
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+  ]
+  action_scale: [
+    0.25, 0.25, 0.25, 0.35, 0.20, 0.20,
+    0.25, 0.25, 0.25, 0.35, 0.20, 0.20,
+    0.15, 0.10, 0.10,
+    0.20, 0.20, 0.20, 0.20, 0.15, 0.15, 0.15,
+    0.20, 0.20, 0.20, 0.20, 0.15, 0.15, 0.15
+  ]

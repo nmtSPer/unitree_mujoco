@@ -1,14 +1,166 @@
 #include "types.hpp"
 
+#include <algorithm>
+#include <filesystem>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace g1 {
+namespace {
+
+namespace fs = std::filesystem;
+
+bool isIncludeKey(const std::string& key) {
+  return key == "include" || key == "includes";
+}
+
+YAML::Node mergeYamlNodes(const YAML::Node& base, const YAML::Node& overlay) {
+  if (!overlay || overlay.IsNull()) {
+    return YAML::Clone(base);
+  }
+
+  if (overlay.IsMap()) {
+    YAML::Node merged = (base && base.IsMap()) ? YAML::Clone(base)
+                                               : YAML::Node(YAML::NodeType::Map);
+    for (const auto& item : overlay) {
+      const auto key = item.first.as<std::string>();
+      if (isIncludeKey(key)) {
+        continue;
+      }
+      merged[key] = mergeYamlNodes(merged[key], item.second);
+    }
+    return merged;
+  }
+
+  if (overlay.IsSequence() && base && base.IsSequence()) {
+    YAML::Node merged = YAML::Clone(base);
+    for (const auto& item : overlay) {
+      merged.push_back(YAML::Clone(item));
+    }
+    return merged;
+  }
+
+  return YAML::Clone(overlay);
+}
+
+void appendIncludePaths(const YAML::Node& include_node,
+                        std::vector<std::string>& includes,
+                        const std::string& context) {
+  if (!include_node) {
+    return;
+  }
+  if (include_node.IsScalar()) {
+    includes.push_back(include_node.as<std::string>());
+    return;
+  }
+  if (!include_node.IsSequence()) {
+    throw std::runtime_error(context + " include must be a string or a list");
+  }
+  for (const auto& item : include_node) {
+    if (!item.IsScalar()) {
+      throw std::runtime_error(context + " include entries must be strings");
+    }
+    includes.push_back(item.as<std::string>());
+  }
+}
+
+YAML::Node loadYamlWithIncludes(const fs::path& path, std::vector<fs::path>& stack) {
+  const auto absolute_path = fs::absolute(path).lexically_normal();
+  if (std::find(stack.begin(), stack.end(), absolute_path) != stack.end()) {
+    throw std::runtime_error("recursive config include: " + absolute_path.string());
+  }
+  if (!fs::exists(absolute_path)) {
+    throw std::runtime_error("config file not found: " + absolute_path.string());
+  }
+
+  stack.push_back(absolute_path);
+  const auto yaml = YAML::LoadFile(absolute_path.string());
+
+  std::vector<std::string> includes;
+  appendIncludePaths(yaml["include"], includes, absolute_path.string());
+  appendIncludePaths(yaml["includes"], includes, absolute_path.string());
+
+  YAML::Node merged(YAML::NodeType::Map);
+  for (const auto& include : includes) {
+    fs::path include_path(include);
+    if (include_path.is_relative()) {
+      include_path = absolute_path.parent_path() / include_path;
+    }
+    merged = mergeYamlNodes(merged, loadYamlWithIncludes(include_path, stack));
+  }
+  merged = mergeYamlNodes(merged, yaml);
+
+  stack.pop_back();
+  return merged;
+}
+
+void loadRequiredMotorArray(const YAML::Node& node, const char* key,
+                            std::array<float, kNumMotors>& dst,
+                            const std::string& context) {
+  const auto src = node ? node[key] : YAML::Node();
+  if (!src || !src.IsSequence()) {
+    throw std::runtime_error(context + " requires '" + key + "' as a " +
+                             std::to_string(kNumMotors) + "-element array");
+  }
+  if (static_cast<int>(src.size()) != kNumMotors) {
+    throw std::runtime_error(context + " '" + key + "' must have exactly " +
+                             std::to_string(kNumMotors) + " values");
+  }
+  for (int i = 0; i < kNumMotors; ++i) {
+    dst[i] = src[i].as<float>();
+  }
+}
+
+void loadRequiredMotorArrayOrScalar(const YAML::Node& node, const char* key,
+                                    std::array<float, kNumMotors>& dst,
+                                    const std::string& context) {
+  const auto src = node ? node[key] : YAML::Node();
+  if (!src) {
+    throw std::runtime_error(context + " requires '" + key + "'");
+  }
+  if (src.IsScalar()) {
+    dst.fill(src.as<float>());
+    return;
+  }
+  if (!src.IsSequence()) {
+    throw std::runtime_error(context + " '" + key +
+                             "' must be a scalar or a " +
+                             std::to_string(kNumMotors) + "-element array");
+  }
+  if (static_cast<int>(src.size()) != kNumMotors) {
+    throw std::runtime_error(context + " '" + key + "' must have exactly " +
+                             std::to_string(kNumMotors) + " values");
+  }
+  for (int i = 0; i < kNumMotors; ++i) {
+    dst[i] = src[i].as<float>();
+  }
+}
+
+void loadPdNode(const YAML::Node& item, StateConfig& state) {
+  state.pd.q_des = state.controller.default_q;
+  state.pd.kp = state.controller.kp;
+  state.pd.kd = state.controller.kd;
+
+  YAML::Node pd = item["pd"];
+  if (!pd) {
+    pd = item;
+  }
+
+  const std::string context = "PD state '" + state.name + "'";
+  loadRequiredMotorArray(pd, "q_des", state.pd.q_des, context);
+  loadRequiredMotorArrayOrScalar(pd, "kp", state.pd.kp, context);
+  loadRequiredMotorArrayOrScalar(pd, "kd", state.pd.kd, context);
+}
+
+}  // namespace
 
 RuntimeConfig loadConfig(const std::string& path) {
   RuntimeConfig config;
   setControllerDefaults(config.controller);
 
-  const auto yaml = YAML::LoadFile(path);
+  std::vector<fs::path> include_stack;
+  const auto yaml = loadYamlWithIncludes(path, include_stack);
   if (yaml["dds"]) {
     const auto dds = yaml["dds"];
     if (dds["domain_id"]) config.domain_id = dds["domain_id"].as<int>();
@@ -58,6 +210,9 @@ RuntimeConfig loadConfig(const std::string& path) {
       if (item["type"]) state.type = item["type"].as<std::string>();
       if (item["policy"]) state.policy = item["policy"].as<std::string>();
       loadControllerNode(item["controller"], state.controller);
+      if (state.type == "pd") {
+        loadPdNode(item, state);
+      }
       if (state.name.empty()) {
         throw std::runtime_error("state entry requires name");
       }

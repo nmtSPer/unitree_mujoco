@@ -26,7 +26,10 @@ set(G1_SOURCES
   "${ROBOT_MAIN}"
   "${CMAKE_CURRENT_LIST_DIR}/src/agent.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/src/config.cpp"
-  "${CMAKE_CURRENT_LIST_DIR}/src/FSM.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/fsm/fsm.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/fsm/passive_state.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/fsm/pd_state.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/src/fsm/rl_state.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/src/keyboard.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/src/policy.cpp"
 )

@@ -1,10 +1,15 @@
 # Workflows
 
+Commands in this file assume the terminal starts at the repository root:
+
+```bash
+cd /path/to/unitree_mujoco
+```
+
 ## Build The C++ Simulator
 
 ```bash
-cd simulate
-./build.sh
+./simulate/build.sh
 ```
 
 Main outputs:
@@ -21,8 +26,7 @@ back to a system install under `/opt/unitree_robotics`.
 ## Build The Sample C++ Agent
 
 ```bash
-cd agent/cpp/go2
-./build.sh
+./agent/cpp/go2/build.sh
 ```
 
 Main output:
@@ -45,24 +49,30 @@ These values become environment variables consumed by `start.yaml`:
 
 - `UNITREE_ROBOT`: folder name under `unitree_robots`.
 - `UNITREE_SCENE`: scene file under `unitree_robots/<robot>`.
+- `UNITREE_MUJOCO_ROOT`: repository root resolved by `start.sh`.
+
+`start.sh` loads the repository-local `start.yaml` by absolute path, so it can
+also be invoked from another directory:
+
+```bash
+/path/to/unitree_mujoco/start.sh robot=go2 scene=scene_terrain.xml
+```
 
 ## Run Manually
 
 Terminal 1:
 
 ```bash
-cd simulate
-./build.sh
-cd build
+./simulate/build.sh
+cd simulate/build
 ./unitree_mujoco -r go2 -s scene_terrain.xml
 ```
 
 Terminal 2:
 
 ```bash
-cd agent/cpp/go2
-./build.sh
-cd build
+./agent/cpp/go2/build.sh
+cd agent/cpp/go2/build
 ./main
 ```
 

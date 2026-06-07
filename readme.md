@@ -13,6 +13,18 @@ current workflow is organized around:
 
 The main tested path is the C++ simulator plus the Go2 C++ `main` agent.
 
+## Command Location
+
+Unless a command says otherwise, run it from this repository root:
+
+```bash
+cd /path/to/unitree_mujoco
+```
+
+Relative commands such as `./simulate/build.sh` and
+`./agent/cpp/<robot>/build.sh` will fail if the terminal is still in `~` or
+another directory.
+
 ## Dependencies
 
 Install common system dependencies:
@@ -75,7 +87,14 @@ Start the simulator and agent with exactly two runtime values:
 ./start.sh robot=go2 scene=scene_terrain.xml
 ```
 
-This loads `start.yaml`, creating one tmux window with two panes:
+`start.sh` can also be called by absolute path from another directory because
+it resolves the repository root before loading tmuxp:
+
+```bash
+/path/to/unitree_mujoco/start.sh robot=go2 scene=scene_terrain.xml
+```
+
+This loads the repository's `start.yaml`, creating one tmux window with two panes:
 
 - left pane: builds and runs `simulate/build/unitree_mujoco`
 - right pane: builds and runs `agent/cpp/<robot>/build/main`
@@ -94,6 +113,7 @@ tmux kill-session -t unitree_mujoco
 Terminal 1:
 
 ```bash
+cd /path/to/unitree_mujoco
 ./simulate/build.sh
 cd simulate/build
 ./unitree_mujoco -r go2 -s scene_terrain.xml
@@ -102,6 +122,7 @@ cd simulate/build
 Terminal 2:
 
 ```bash
+cd /path/to/unitree_mujoco
 ./agent/cpp/go2/build.sh
 cd agent/cpp/go2/build
 ./main
@@ -173,6 +194,7 @@ agent/cpp/g1/main.cpp
 Then build that robot's controllers:
 
 ```bash
+cd /path/to/unitree_mujoco
 ./agent/cpp/g1/build.sh
 ```
 

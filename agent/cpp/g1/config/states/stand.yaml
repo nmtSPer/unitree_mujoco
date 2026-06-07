@@ -1,0 +1,4 @@
+states:
+  - name: "stand"
+    type: "rl"
+    policy: "zero"

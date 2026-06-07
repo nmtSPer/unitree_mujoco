@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UNITREE_ROBOT="${UNITREE_ROBOT:-}"
 UNITREE_SCENE="${UNITREE_SCENE:-}"
+UNITREE_MUJOCO_ROOT="$ROOT_DIR"
 
 usage() {
   cat <<EOF
@@ -42,8 +43,29 @@ done
 : "${UNITREE_ROBOT:?Missing robot=...}"
 : "${UNITREE_SCENE:?Missing scene=...}"
 
+if ! command -v tmuxp >/dev/null 2>&1; then
+  echo "tmuxp is required for start.sh. Install tmuxp or run the simulator and agent manually." >&2
+  exit 1
+fi
+
+if [ ! -x "$ROOT_DIR/simulate/build.sh" ]; then
+  echo "Simulator build script not found: $ROOT_DIR/simulate/build.sh" >&2
+  exit 1
+fi
+
+if [ ! -x "$ROOT_DIR/agent/cpp/$UNITREE_ROBOT/build.sh" ]; then
+  echo "Agent build script not found: $ROOT_DIR/agent/cpp/$UNITREE_ROBOT/build.sh" >&2
+  exit 1
+fi
+
+if [ ! -f "$ROOT_DIR/unitree_robots/$UNITREE_ROBOT/$UNITREE_SCENE" ]; then
+  echo "Scene file not found: $ROOT_DIR/unitree_robots/$UNITREE_ROBOT/$UNITREE_SCENE" >&2
+  exit 1
+fi
+
 export UNITREE_ROBOT
 export UNITREE_SCENE
+export UNITREE_MUJOCO_ROOT
 
 cd "$ROOT_DIR"
-tmuxp load start.yaml
+tmuxp load "$ROOT_DIR/start.yaml"

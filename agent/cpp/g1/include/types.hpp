@@ -114,11 +114,18 @@ struct PolicyConfig {
   std::string model_path;
 };
 
+struct PdConfig {
+  std::array<float, kNumMotors> q_des{};
+  std::array<float, kNumMotors> kp{};
+  std::array<float, kNumMotors> kd{};
+};
+
 struct StateConfig {
   std::string name;
   std::string type = "rl";
   std::string policy;
   ControllerConfig controller;
+  PdConfig pd;
 };
 
 struct FsmConfig {
