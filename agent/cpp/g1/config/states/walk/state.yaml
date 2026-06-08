@@ -1,4 +1,4 @@
 states:
   - name: "walk"
     type: "rl"
-    policy: "walk_joint"
+    policy: "walk_policy"

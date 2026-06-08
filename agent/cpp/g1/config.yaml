@@ -3,6 +3,10 @@ include:
   - config/policies.yaml
   - config/states/passive.yaml
   - config/states/pd.yaml
-  - config/states/stand.yaml
-  - config/states/walk.yaml
+  - config/states/stand/policy.yaml
+  - config/states/stand/state.yaml
+  - config/states/walk/policy.yaml
+  - config/states/walk/state.yaml
+  - config/states/run/policy.yaml
+  - config/states/run/state.yaml
   - config/fsm.yaml

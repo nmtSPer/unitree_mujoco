@@ -9,3 +9,5 @@ fsm:
       to: "stand"
     - key: "4"
       to: "walk"
+    - key: "5"
+      to: "run"

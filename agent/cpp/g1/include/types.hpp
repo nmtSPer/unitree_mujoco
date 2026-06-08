@@ -133,6 +133,13 @@ struct FsmConfig {
   std::map<char, std::string> key_transitions;
 };
 
+struct TelemetryConfig {
+  bool enabled = false;
+  std::string host = "127.0.0.1";
+  int port = 9870;
+  int decimation = 1;
+};
+
 struct RuntimeConfig {
   int domain_id = 1;
   std::string interface = "lo";
@@ -140,6 +147,7 @@ struct RuntimeConfig {
   std::string lowstate_topic = "rt/lowstate";
   bool release_motion_service = true;
   bool wait_for_enter = true;
+  TelemetryConfig telemetry;
   KeyboardConfig keyboard;
   ControllerConfig controller;
   FsmConfig fsm;

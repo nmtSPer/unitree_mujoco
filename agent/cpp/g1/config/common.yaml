@@ -10,6 +10,12 @@ runtime:
   release_motion_service: false
   wait_for_enter: true
 
+telemetry:
+  enabled: true
+  host: "127.0.0.1"
+  port: 9870
+  decimation: 1
+
 keyboard:
   vx_step: 0.05
   vy_step: 0.05

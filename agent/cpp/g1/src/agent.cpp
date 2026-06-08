@@ -2,9 +2,15 @@
 
 #include <chrono>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <thread>
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include <unitree/robot/b2/motion_switcher/motion_switcher_client.hpp>
 #include <unitree/robot/channel/channel_factory.hpp>
@@ -17,11 +23,16 @@ G1RlAgent::G1RlAgent(RuntimeConfig config)
       fsm_(config_, policy_factory_),
       keyboard_(config_.keyboard, config_.controller.limits, config_.fsm.key_transitions) {}
 
+G1RlAgent::~G1RlAgent() {
+  closeTelemetry();
+}
+
 void G1RlAgent::init() {
   unitree::robot::ChannelFactory::Instance()->Init(config_.domain_id, config_.interface);
   if (config_.release_motion_service) {
     releaseMotionService();
   }
+  initTelemetry();
 
   MotorCommand zero;
   zeroCommand(zero, false);
@@ -85,6 +96,7 @@ void G1RlAgent::run() {
   MotorCommand command;
   fsm_.step(input, context_, command);
   command_buffer_.set(command);
+  publishTelemetry(context_.state, command);
 }
 
 void G1RlAgent::lowStateHandler(const void* message) {
@@ -149,6 +161,66 @@ void G1RlAgent::releaseMotionService() {
     std::cout << "[g1] releasing active motion service: " << name << "\n";
     msc->ReleaseMode();
     std::this_thread::sleep_for(std::chrono::seconds(2));
+  }
+}
+
+void G1RlAgent::initTelemetry() {
+  if (!config_.telemetry.enabled) {
+    return;
+  }
+
+  telemetry_socket_ = socket(AF_INET, SOCK_DGRAM, 0);
+  if (telemetry_socket_ < 0) {
+    std::cerr << "[g1] failed to create telemetry UDP socket\n";
+    config_.telemetry.enabled = false;
+    return;
+  }
+
+  telemetry_addr_ = {};
+  telemetry_addr_.sin_family = AF_INET;
+  telemetry_addr_.sin_port = htons(static_cast<uint16_t>(config_.telemetry.port));
+  if (inet_pton(AF_INET, config_.telemetry.host.c_str(), &telemetry_addr_.sin_addr) != 1) {
+    std::cerr << "[g1] invalid telemetry host: " << config_.telemetry.host << "\n";
+    closeTelemetry();
+    config_.telemetry.enabled = false;
+    return;
+  }
+
+  std::cout << "[g1] telemetry UDP JSON enabled at " << config_.telemetry.host << ":"
+            << config_.telemetry.port << "\n";
+}
+
+void G1RlAgent::publishTelemetry(const RobotState& state, const MotorCommand& command) {
+  if (!config_.telemetry.enabled || telemetry_socket_ < 0) {
+    return;
+  }
+  if (++telemetry_counter_ < config_.telemetry.decimation) {
+    return;
+  }
+  telemetry_counter_ = 0;
+
+  std::ostringstream json;
+  json << std::fixed << std::setprecision(6) << "{";
+  for (int i = 0; i < kNumMotors; ++i) {
+    if (i > 0) {
+      json << ",";
+    }
+    json << "\"q_ref/" << i << "\":" << command.q[i]
+         << ",\"q/" << i << "\":" << state.motor.q[i]
+         << ",\"kp/" << i << "\":" << command.kp[i]
+         << ",\"kd/" << i << "\":" << command.kd[i];
+  }
+  json << "}";
+
+  const auto payload = json.str();
+  sendto(telemetry_socket_, payload.data(), payload.size(), 0,
+         reinterpret_cast<const sockaddr*>(&telemetry_addr_), sizeof(telemetry_addr_));
+}
+
+void G1RlAgent::closeTelemetry() {
+  if (telemetry_socket_ >= 0) {
+    close(telemetry_socket_);
+    telemetry_socket_ = -1;
   }
 }
 

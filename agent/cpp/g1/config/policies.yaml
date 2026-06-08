@@ -1,6 +1,4 @@
 policies:
   - name: "zero"
     type: "zero"
-  - name: "walk_joint"
-    type: "zero"
     model_path: ""

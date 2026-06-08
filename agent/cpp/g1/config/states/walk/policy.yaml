@@ -1,0 +1,5 @@
+policies:
+  - name: "walk_policy"
+    # Keep zero until an ONNX JointPolicy backend is wired in.
+    type: "zero"
+    model_path: "policies/walk.onnx"

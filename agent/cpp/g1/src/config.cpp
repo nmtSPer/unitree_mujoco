@@ -15,6 +15,34 @@ bool isIncludeKey(const std::string& key) {
   return key == "include" || key == "includes";
 }
 
+bool hasUriScheme(const std::string& value) {
+  return value.find("://") != std::string::npos;
+}
+
+void normalizePolicyModelPaths(YAML::Node yaml, const fs::path& base_dir) {
+  const auto policies = yaml ? yaml["policies"] : YAML::Node();
+  if (!policies || !policies.IsSequence()) {
+    return;
+  }
+
+  for (auto policy : policies) {
+    const auto model_path_node = policy["model_path"];
+    if (!model_path_node || !model_path_node.IsScalar()) {
+      continue;
+    }
+
+    const auto model_path_value = model_path_node.as<std::string>();
+    if (model_path_value.empty() || hasUriScheme(model_path_value)) {
+      continue;
+    }
+
+    fs::path model_path(model_path_value);
+    if (model_path.is_relative()) {
+      policy["model_path"] = (base_dir / model_path).lexically_normal().string();
+    }
+  }
+}
+
 YAML::Node mergeYamlNodes(const YAML::Node& base, const YAML::Node& overlay) {
   if (!overlay || overlay.IsNull()) {
     return YAML::Clone(base);
@@ -75,7 +103,8 @@ YAML::Node loadYamlWithIncludes(const fs::path& path, std::vector<fs::path>& sta
   }
 
   stack.push_back(absolute_path);
-  const auto yaml = YAML::LoadFile(absolute_path.string());
+  auto yaml = YAML::LoadFile(absolute_path.string());
+  normalizePolicyModelPaths(yaml, absolute_path.parent_path());
 
   std::vector<std::string> includes;
   appendIncludePaths(yaml["include"], includes, absolute_path.string());
@@ -178,6 +207,15 @@ RuntimeConfig loadConfig(const std::string& path) {
     }
     if (runtime["wait_for_enter"]) {
       config.wait_for_enter = runtime["wait_for_enter"].as<bool>();
+    }
+  }
+  if (yaml["telemetry"]) {
+    const auto telemetry = yaml["telemetry"];
+    if (telemetry["enabled"]) config.telemetry.enabled = telemetry["enabled"].as<bool>();
+    if (telemetry["host"]) config.telemetry.host = telemetry["host"].as<std::string>();
+    if (telemetry["port"]) config.telemetry.port = telemetry["port"].as<int>();
+    if (telemetry["decimation"]) {
+      config.telemetry.decimation = std::max(1, telemetry["decimation"].as<int>());
     }
   }
   if (yaml["keyboard"]) {

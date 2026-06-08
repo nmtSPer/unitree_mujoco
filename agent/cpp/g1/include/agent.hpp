@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <netinet/in.h>
 
 #include <unitree/common/thread/thread.hpp>
 #include <unitree/idl/hg/LowCmd_.hpp>
@@ -18,6 +19,7 @@ namespace g1 {
 class G1RlAgent {
  public:
   explicit G1RlAgent(RuntimeConfig config);
+  ~G1RlAgent();
   void init();
   void enter();
   void shutdown();
@@ -28,6 +30,9 @@ class G1RlAgent {
   void lowStateHandler(const void* message);
   void writeLowCommand();
   void releaseMotionService();
+  void initTelemetry();
+  void publishTelemetry(const RobotState& state, const MotorCommand& command);
+  void closeTelemetry();
 
   RuntimeConfig config_;
   PolicyFactory policy_factory_;
@@ -38,6 +43,9 @@ class G1RlAgent {
   DataBuffer<MotorCommand> command_buffer_;
   std::atomic_bool stop_requested_{false};
   std::atomic<uint8_t> latest_mode_machine_{0};
+  int telemetry_socket_ = -1;
+  sockaddr_in telemetry_addr_{};
+  int telemetry_counter_ = 0;
   unitree::robot::ChannelPublisherPtr<unitree_hg::msg::dds_::LowCmd_> lowcmd_publisher_;
   unitree::robot::ChannelSubscriberPtr<unitree_hg::msg::dds_::LowState_> lowstate_subscriber_;
   unitree::common::ThreadPtr writer_thread_;

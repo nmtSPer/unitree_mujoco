@@ -1,0 +1,4 @@
+states:
+  - name: "run"
+    type: "rl"
+    policy: "run_policy"

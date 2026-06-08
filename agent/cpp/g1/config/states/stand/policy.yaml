@@ -1,0 +1,5 @@
+policies:
+  - name: "stand_policy"
+    # Keep zero until an ONNX JointPolicy backend is wired in.
+    # type: "zero"
+    model_path: "policies/2026-06-06_14-38-35_motrix.onnx"
